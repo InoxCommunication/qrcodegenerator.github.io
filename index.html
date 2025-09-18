@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SVG QR Code Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f0f2f5;
+        padding: 20px;
+        margin: 0;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #555;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        box-sizing: border-box;
+      }
+
+      input:focus,
+      select:focus {
+        border-color: #4caf50;
+        outline: none;
+      }
+
+      button {
+        background: #4caf50;
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      button:hover {
+        background: #45a049;
+      }
+
+      .colors {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .qr-output {
+        margin-top: 30px;
+        text-align: center;
+        display: none;
+      }
+
+      .qr-codes {
+        display: flex;
+        gap: 30px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 20px;
+      }
+
+      .qr-item {
+        border: 2px solid #ddd;
+        padding: 15px;
+        border-radius: 10px;
+        background: #f9f9f9;
+      }
+
+      canvas {
+        display: block;
+        margin: 10px auto;
+        border: 1px solid #ccc;
+      }
+
+      .download-btn {
+        background: #2196f3;
+        padding: 8px 16px;
+        font-size: 14px;
+        width: auto;
+        margin: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>SVG QR Code Generator</h1>
+
+      <div class="input-group">
+        <label for="urlInput">URL or Text to Encode:</label>
+        <input
+          type="text"
+          id="urlInput"
+          value="https://2b9fj8.share-eu1.hsforms.com/2Rj3I5dLcSs-1Y94fbgQvDg"
+          placeholder="Enter URL or text here"
+        />
+      </div>
+
+      <div class="input-group">
+        <label for="sizeSelect">Size:</label>
+        <select id="sizeSelect">
+          <option value="200">200x200px</option>
+          <option value="300" selected>300x300px</option>
+          <option value="400">400x400px</option>
+        </select>
+      </div>
+
+      <div class="colors">
+        <div class="input-group">
+          <label for="foregroundColor">Foreground Color:</label>
+          <input type="color" id="foregroundColor" value="#000000" />
+        </div>
+        <div class="input-group">
+          <label for="backgroundColor">Background Color:</label>
+          <input type="color" id="backgroundColor" value="#ffffff" />
+        </div>
+      </div>
+
+      <button onclick="generateQR()">Generate QR Code</button>
+
+      <div class="qr-output" id="qrOutput">
+        <h3>Your QR Code:</h3>
+        <div class="qr-codes">
+          <div class="qr-item">
+            <canvas id="qrCanvas"></canvas>
+            <button class="download-btn" onclick="downloadSVG()">
+              Download SVG
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let qrCode;
+
+      function generateQR() {
+        const url = document.getElementById('urlInput').value.trim();
+        const size = parseInt(document.getElementById('sizeSelect').value);
+        const foreground = document.getElementById('foregroundColor').value;
+        const background = document.getElementById('backgroundColor').value;
+
+        if (!url) {
+          alert('Please enter a URL or text');
+          return;
+        }
+
+        qrCode = new QRious({
+          element: document.getElementById('qrCanvas'),
+          value: url,
+          size: size,
+          level: 'H',
+          foreground: foreground,
+          background: background,
+        });
+
+        document.getElementById('qrOutput').style.display = 'block';
+      }
+
+      function downloadSVG() {
+        if (!qrCode) return;
+
+        const canvas = document.getElementById('qrCanvas');
+        const size = qrCode.size;
+        const foreground = qrCode.foreground;
+        const background = qrCode.background;
+
+        // Convert canvas to SVG
+        const ctx = canvas.getContext('2d');
+        const imageData = ctx.getImageData(0, 0, size, size);
+
+        let svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+<rect width="100%" height="100%" fill="${background}"/>`;
+
+        // Create SVG paths from canvas pixels
+        for (let y = 0; y < size; y++) {
+          for (let x = 0; x < size; x++) {
+            const index = (y * size + x) * 4;
+            if (imageData.data[index] < 128) {
+              // Dark pixel
+              svg += `<rect x="${x}" y="${y}" width="1" height="1" fill="${foreground}"/>`;
+            }
+          }
+        }
+
+        svg += '</svg>';
+
+        // Download
+        const blob = new Blob([svg], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'qr-code.svg';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      // Auto-generate on page load
+      window.onload = function () {
+        generateQR();
+      };
+    </script>
+  </body>
+</html>
