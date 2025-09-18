@@ -277,12 +277,7 @@
 
       <div class="input-group">
         <label for="urlInput">URL or Text to Encode:</label>
-        <input
-          type="text"
-          id="urlInput"
-          value="https://2b9fj8.share-eu1.hsforms.com/2Rj3I5dLcSs-1Y94fbgQvDg"
-          placeholder="Enter URL or text here"
-        />
+        <input type="text" id="urlInput" placeholder="Enter URL or text here" />
         <div class="helper-note" role="note" aria-live="polite">
           <span class="dot" aria-hidden="true"></span>
           <span
@@ -394,9 +389,12 @@
         URL.revokeObjectURL(url);
       }
 
-      // Auto-generate on page load
+      // Auto-generate only if the input already has a value (avoid empty alert)
       window.onload = function () {
-        generateQR();
+        const initial = document.getElementById('urlInput').value.trim();
+        if (initial) {
+          generateQR();
+        }
       };
     </script>
   </body>
