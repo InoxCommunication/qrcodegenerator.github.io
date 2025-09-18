@@ -239,6 +239,17 @@
         color: var(--ink-600);
         letter-spacing: 0.2px;
       }
+
+      /* Subtle helper note */
+      .helper-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-top: 8px;
+        color: var(--ink-600);
+        font-size: 12px;
+        line-height: 1.45;
+      }
     </style>
   </head>
   <body>
@@ -272,6 +283,13 @@
           value="https://2b9fj8.share-eu1.hsforms.com/2Rj3I5dLcSs-1Y94fbgQvDg"
           placeholder="Enter URL or text here"
         />
+        <div class="helper-note" role="note" aria-live="polite">
+          <span class="dot" aria-hidden="true"></span>
+          <span
+            >Note: Once generated, the QR code link is permanent and cannot be
+            changed.</span
+          >
+        </div>
       </div>
 
       <div class="input-group">
